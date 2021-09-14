@@ -14,7 +14,7 @@ time = now.strftime("%Y-%m-%d %H")
 user_size = DB.user_size()
 DB_csv.DB_Data_Csv_Save()
 TIME_STEPS = 24
-
+score_time=now.strftime("%H")
 
 # TIME_STEPS훈련 데이터에서 연속 된 데이터 값을 결합하는 시퀀스를 만듭니다 .
 def create_sequences(values, time_steps=TIME_STEPS):
@@ -27,7 +27,7 @@ def Humidity_Traning() :
     #학습데이터
     #index_col = CSV 데이터가 Index_col 을 기준으로 정렬됨
     Traning_data = pd.read_csv(
-        f'{path}\Data\Time_Serial_Anomaly_Data.csv', parse_dates=True, index_col="timestamp"
+        f'{path}\Treaning\Time_Serial_Anomaly_Data.csv', parse_dates=True, index_col="timestamp"
         , usecols=['timestamp', 'humidity']
     )
 
@@ -130,6 +130,9 @@ def Humidity() :
         print("Anomaly data(count) : ", np.sum(anomalies))
         print("Indices of anomaly samples: ", np.where(anomalies))
 
+        DB.anomaly_score_humidity(i, test_mae_loss, score_time)
+        DB.threshold_humidity(i, threshold)
+
         if np.sum(anomalies) == 0 :
             Humidity_result.append(0)
 
@@ -141,13 +144,13 @@ def Humidity() :
         anomalous_data_indices = []
         for data_idx in range(TIME_STEPS - 1, len(df_test_value) - TIME_STEPS + 1):
             if np.all(anomalies[data_idx - TIME_STEPS + 1 : data_idx]):
-               anomalous_data_indices.append(data_idx)
+                anomalous_data_indices.append(data_idx)
 
         df_subset = Test_data.iloc[anomalous_data_indices]
         fig, ax = plt.subplots()
         Test_data.plot(legend=False, ax=ax)
         df_subset.plot(legend=False, ax=ax, color="r")
-        plt.title('Humidity_Detection')
-        plt.savefig(f'C:/Users/GM/eclipse-workspace/AI_Project_Hoseo_2021/WebContent/img/Humidity_Detection{time}_{i}.png')
-        plt.show()
+        #plt.title('Humidity_Detection')
+        #plt.savefig(f'C:/Users/GM/eclipse-workspace/AI_Project_Hoseo_2021/WebContent/img/Humidity_Detection{time}_{i}.png')
+        #plt.show()
     return Humidity_result

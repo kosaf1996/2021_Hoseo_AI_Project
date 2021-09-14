@@ -187,7 +187,7 @@ for i in range(user_size):
     anomalous_data_indices = []
     for data_idx in range(TIME_STEPS - 1, len(df_test_value) - TIME_STEPS + 1):
         if np.all(anomalies[data_idx - TIME_STEPS + 1 : data_idx]):
-           anomalous_data_indices.append(data_idx)
+            anomalous_data_indices.append(data_idx)
 
     df_subset = Test_data.iloc[anomalous_data_indices]
     fig, ax = plt.subplots()

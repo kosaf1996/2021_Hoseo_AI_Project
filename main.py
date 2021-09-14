@@ -1,20 +1,22 @@
 import Temp_Anomaly
 import Humidity_Anomaly
 import DB
+import Delete_old
 user_size = DB.user_size()
 
+# old file delete
+Delete_old.delete_old_files()
 
-#result Data list
+# result Data list
 temp = []
 humidity = []
 
-#Anomaly Detection
+# Anomaly Detection
 temp_anomaly = Temp_Anomaly.Temp()
-humidity_anomaly = Humidity_Anomaly.Humidity()
 
-#Data
+# Data
 temp.append(temp_anomaly)
-humidity.append(humidity_anomaly)
 
 for i in range(user_size) :
     DB.anomaly(i,temp[0][i],humidity[0][i])
+
