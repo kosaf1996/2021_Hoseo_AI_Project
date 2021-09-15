@@ -29,7 +29,7 @@ def Temp_Traning() :
     #index_col = CSV 데이터가 Index_col 을 기준으로 정렬됨
     Traning_data = pd.read_csv(
         f'{path}\Treaning\Time_Serial_Anomaly_Data.csv', parse_dates=True, index_col="timestamp"
-        , usecols=['timestamp', 'temp', 'humidity'])
+        , usecols=['timestamp', 'temp', 'humidity', 'gas', 'water', 'volt'])
 
     #LOAD_DATA head print
     print(Traning_data.head())
@@ -130,7 +130,7 @@ def Temp() :
         print("Anomaly data(count) : ", np.sum(anomalies))
         print("Indices of anomaly samples: ", np.where(anomalies))
 
-        DB.anomaly_score_temp(i,test_mae_loss,score_time)
+        DB.anomaly_score_temp(i, test_mae_loss, score_time)
         DB.threshold_temp(i,threshold)
 
         if np.sum(anomalies) == 0 :

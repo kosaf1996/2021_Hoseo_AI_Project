@@ -7,7 +7,7 @@ time = now.strftime("%Y-%m-%d %H")
 
 
 def getConnection():
-    con = db.connect(host="221.145.148.151", port=8888, user="raspi_user", passwd="topad159@", db="raspi_db")
+    con = db.connect (host="221.145.148.151",port=8888, user="raspi_user",passwd="topad159@",db="raspi_db")
     return con
 
 def user_size():
@@ -24,33 +24,69 @@ def select_data(uscd):
     conn = getConnection()
     cursor = conn.cursor()
 
-# sql = f"select temp from raspi_db.collect_data_dht11 where uscd=0 and timestamp =DATE_ADD(NOW(), INTERVAL -1 SECOND)"
-
-    sql = f"select a.timestamp, a.temp, a.humidity, b.carbon_monoxide, c.wateruse FROM collect_data_dht11 a,collect_data_gsms61_p110 b,  collect_data_yf_s201 c " \
-          f"WHERE a.uscd= {uscd} and a.timestamp BETWEEN '{time}:00:00' AND '{time}:59:59' AND b.uscd= {uscd} and b.timestamp BETWEEN '{time}:00:00' AND '{time}:59:59' AND " \
-          f"c.uscd= {uscd} and c.timestamp BETWEEN '{time}:00:00' AND '{time}:59:59'"
-
-    print(sql)
-
+    #sql = f"select temp from raspi_db.collect_data_dht11 where uscd=0 and timestamp =DATE_ADD(NOW(), INTERVAL -1 SECOND)"
+    sql = f"select timestamp,temp,humidity from raspi_db.collect_data_dht11 where uscd={uscd} and timestamp BETWEEN '{time}:00:00' AND '{time}:59:59'"
     cursor.execute(sql)
     temp = cursor.fetchall()
+
     return temp
 
 
-def anomaly(uscd, temp, humidity):
+def select_gas(uscd):
+    conn = getConnection()
+    cursor = conn.cursor()
+
+
+    sql = f"select carbon_monoxide from raspi_db.collect_data_gsms61_p110 where uscd={uscd} and timestamp BETWEEN '{time}:00:00' AND '{time}:59:59'"
+    cursor.execute(sql)
+    gas = cursor.fetchall()
+
+    return gas
+
+
+def select_water(uscd):
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    sql = f"select wateruse from raspi_db.collect_data_yf_s201 where uscd={uscd} and timestamp BETWEEN '{time}:00:00' AND '{time}:59:59'"
+    cursor.execute(sql)
+    water = cursor.fetchall()
+
+    return water
+
+def select_volt(uscd):
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    sql = f"select voltage from raspi_db.collect_data_acs712 where uscd={uscd} and timestamp BETWEEN '{time}:00:00' AND '{time}:59:59'"
+    cursor.execute(sql)
+    volt = cursor.fetchall()
+    print(volt)
+    return volt
+
+
+
+
+
+
+
+
+def anomaly(uscd, temp, humidity, gas, water, volt):
     conn = getConnection()
     cursor = conn.cursor()
     sql = f"SELECT * FROM raspi_db.Anomaly where uscd = {uscd}"
     cursor.execute(sql)
     existence = cursor.fetchall()
 
-    if len(existence) == 0:
-        sql1 = f"INSERT INTO `raspi_db`.`Anomaly`(`uscd`, `temp`, `humidity`) VALUES ('{uscd}','{temp}',{humidity})"
+    if len(existence) == 0 :
+        sql1 = f"INSERT INTO `raspi_db`.`Anomaly`(`uscd`, `temp`, `humidity`, 'gas', 'water', 'volt') VALUES " \
+               f"('{uscd}','{temp}','{humidity}', '{gas}', '{water}', '{volt}')"
         cursor.execute(sql1)
         conn.commit()
 
-    elif len(existence) == 1:
-        sql2 =f"UPDATE raspi_db.Anomaly SET `temp` = {temp},  `humidity` = {humidity} WHERE uscd = {uscd};"
+    elif len(existence) == 1 :
+        sql2 =f"UPDATE raspi_db.Anomaly SET `temp` = {temp},  `humidity` = {humidity}, 'gas' = {gas}, " \
+              f"water' = {water}, 'volt' = {volt} WHERE uscd = {uscd};"
         cursor.execute(sql2)
         conn.commit()
 
