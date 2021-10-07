@@ -61,17 +61,10 @@ def select_volt(uscd):
     sql = f"select voltage from raspi_db.collect_data_acs712 where uscd={uscd} and timestamp BETWEEN '{time}:00:00' AND '{time}:59:59'"
     cursor.execute(sql)
     volt = cursor.fetchall()
-    print(volt)
     return volt
 
 
-
-
-
-
-
-
-def anomaly(uscd, temp, humidity, gas, water, volt):
+def anomaly(uscd, temp, humidity,gas,water,volt):
     conn = getConnection()
     cursor = conn.cursor()
     sql = f"SELECT * FROM raspi_db.Anomaly where uscd = {uscd}"
@@ -79,58 +72,40 @@ def anomaly(uscd, temp, humidity, gas, water, volt):
     existence = cursor.fetchall()
 
     if len(existence) == 0 :
-        sql1 = f"INSERT INTO `raspi_db`.`Anomaly`(`uscd`, `temp`, `humidity`, 'gas', 'water', 'volt') VALUES " \
-               f"('{uscd}','{temp}','{humidity}', '{gas}', '{water}', '{volt}')"
+        sql1 = f"INSERT INTO `raspi_db`.`Anomaly`(`uscd`,`temp`,`humidity`,`wateruse`,`carbon_monoxide`,`voltage` ) VALUES ('{uscd}','{temp}','{humidity}','{water}','{gas}','{volt}')"
         cursor.execute(sql1)
         conn.commit()
 
     elif len(existence) == 1 :
-        sql2 =f"UPDATE raspi_db.Anomaly SET `temp` = {temp},  `humidity` = {humidity}, 'gas' = {gas}, " \
-              f"water' = {water}, 'volt' = {volt} WHERE uscd = {uscd};"
+        sql2 =f"UPDATE raspi_db.Anomaly SET `temp` ={temp},`humidity` ={humidity},`wateruse` ={water},`carbon_monoxide` ={gas},`voltage` ={volt} WHERE uscd = {uscd};"
         cursor.execute(sql2)
         conn.commit()
 
-def anomaly_score_temp(uscd, data,time):
+def anomaly_score(uscd, temp, humidity, gas, water, volt, time):
     conn = getConnection()
     cursor = conn.cursor()
     sql = f"SELECT * FROM raspi_db.Anomaly_Score where time = {time} AND uscd ={uscd}"
     cursor.execute(sql)
     existence = cursor.fetchall()
 
-    if len(existence) == 0:
-        for i in range(len(data)):
-
-            sql1 = f"INSERT INTO `raspi_db`.`Anomaly_Score` (`uscd`, `time`, `count`, `temp`) VALUES ('{uscd}', '{time}','{i}' ,'{data[i]}')"
-            cursor.execute(sql1)
-            conn.commit()
-    elif len(existence) != 0:
-        for i in range(len(data)):
-            sql2 = f"UPDATE `raspi_db`.`Anomaly_Score` SET `temp` ={data[i]} WHERE uscd ={uscd} AND time ={time} AND count ={i} "
-            cursor.execute(sql2)
-            conn.commit()
-
-
-def anomaly_score_humidity(uscd, data,time):
-    conn = getConnection()
-    cursor = conn.cursor()
-    sql = f"SELECT * FROM raspi_db.Anomaly_Score where time = {time} AND uscd ={uscd}"
-    cursor.execute(sql)
-    existence = cursor.fetchall()
 
     if len(existence) == 0:
-        for i in range(len(data)):
-            sql1 = f"INSERT INTO `raspi_db`.`Anomaly_Score` (`uscd`, `time`, `count`, `humidity`) VALUES ('{uscd}', '{time}','{i}' ,'{data[i]}')"
+        count = 0
+        for i in range(len(temp)):
+            sql1 = f"INSERT INTO `raspi_db`.`Anomaly_Score` (`uscd`, `time`, `count`, `temp`, `humidity`, `wateruse`, `carbon_monxide`, `voltare`) VALUES ('{uscd}', '{time}','{count}' ,'{temp[i][0]}','{humidity[i][0]}','{water[i][0]}','{gas[i][0]}','{volt[i][0]}')"
+            count = count + 1
             cursor.execute(sql1)
             conn.commit()
 
     elif len(existence) != 0:
-        for i in range(len(data)):
-            sql2 = f"UPDATE `raspi_db`.`Anomaly_Score` SET `humidity` ={data[i]} WHERE uscd ={uscd} AND time ={time} AND count ={i} "
+        for i in range(len(temp)):
+            sql2 = f"UPDATE `raspi_db`.`Anomaly_Score` SET `temp` ={temp[i][0]},`humidity` ={humidity[i][0]},`wateruse` ={water[i][0]},`carbon_monxide`={gas[i][0]},`voltare` ={volt[i][0]} WHERE uscd ={uscd} AND time ={time} AND count ={i} "
             cursor.execute(sql2)
             conn.commit()
 
 
-def threshold_temp(uscd,threshold):
+
+def threshold(uscd,temp,humidity,gas,water,volt):
     conn = getConnection()
     cursor = conn.cursor()
     sql = f"SELECT * FROM raspi_db.threshold where  uscd ={uscd}"
@@ -139,32 +114,14 @@ def threshold_temp(uscd,threshold):
 
     if len(existence) == 0:
 
-        sql1 = f"INSERT INTO `raspi_db`.`threshold` (`uscd`, `temp`) VALUES ('{uscd}', '{threshold}')"
+        sql1 = f"INSERT INTO `raspi_db`.`threshold` (`uscd`, `temp`, `humidity`, `wateruse`, `carbon_monxide`, `voltare`) VALUES ('{uscd}', '{temp}', '{humidity}', '{gas}', '{water}', '{volt}')"
         cursor.execute(sql1)
         conn.commit()
 
     elif len(existence) != 0:
 
-        sql2 = f"UPDATE `raspi_db`.`threshold` SET `temp` ={threshold} WHERE uscd ={uscd} "
+        sql2 = f"UPDATE `raspi_db`.`threshold` SET `temp` ={temp}, `humidity`={humidity}, `wateruse`={water}, `carbon_monxide`={gas}, `voltare`={volt} WHERE uscd ={uscd} "
         cursor.execute(sql2)
         conn.commit()
 
 
-def threshold_humidity(uscd,threshold):
-    conn = getConnection()
-    cursor = conn.cursor()
-    sql = f"SELECT * FROM raspi_db.threshold where  uscd ={uscd}"
-    cursor.execute(sql)
-    existence = cursor.fetchall()
-
-    if len(existence) == 0:
-
-        sql1 = f"INSERT INTO `raspi_db`.`threshold` (`uscd`, `humidity`) VALUES ('{uscd}', '{threshold}')"
-        cursor.execute(sql1)
-        conn.commit()
-
-    elif len(existence) != 0:
-
-        sql2 = f"UPDATE `raspi_db`.`threshold` SET `humidity` ={threshold} WHERE uscd ={uscd} "
-        cursor.execute(sql2)
-        conn.commit()

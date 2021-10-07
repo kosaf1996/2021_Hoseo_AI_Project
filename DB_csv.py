@@ -36,7 +36,8 @@ def DB_Data_Csv_Save():
         label = {'timestamp' :  timestamp, 'temp' : temp ,'humidity':humidity , 'gas' : gas, 'water' : water, 'volt': volt}
 
         dataframe = pd.DataFrame(label)
-        dataframe.to_csv(f'{path}\Data\Time_Serial_Anomaly{time}_{i}.csv',index=False,header=True )
+        print(path)
+        dataframe.to_csv(f'{path}/Data/Time_Serial_Anomaly{time}_{i}.csv',index=False,header=True )
 
         #list clear
         timestamp.clear()

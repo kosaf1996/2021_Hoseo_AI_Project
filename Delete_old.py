@@ -4,7 +4,7 @@ path = os.getcwd()
 
 def delete_old_files():
     """path_target:삭제할 파일이 있는 디렉토리, days_elapsed:경과일수"""
-    path_target =  (f'{path}\Data')
+    path_target =  (f'{path}/Data')
     days_elapsed = 7
     for f in os.listdir(path_target): # 디렉토리를 조회한다
         f = os.path.join(path_target, f)
