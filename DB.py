@@ -7,7 +7,7 @@ time = now.strftime("%Y-%m-%d %H")
 
 
 def getConnection():
-    con = db.connect (host="221.145.148.151",port=8888, user="raspi_user",passwd="topad159@",db="raspi_db")
+    con = db.connect ()
     return con
 
 def user_size():
