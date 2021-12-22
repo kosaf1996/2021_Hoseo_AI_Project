@@ -1,3 +1,4 @@
-## 졸업작품
+## 호서대학교 졸업 프로젝트
 
-CNN -> TimeSerial Anomaly Detection
+CNN 을 활용한 시계열 분석 
+
